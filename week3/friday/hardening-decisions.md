@@ -1,0 +1,41 @@
+*(This document is tailored to read-out executive business-risk profiles, omitting low-level CLI commands.)*
+```markdown
+# Security Posture and Infrastructure Resilience Report
+
+## Executive Summary
+The deployment of the KijaniKiosk production environment represents a significant milestone in our operational maturity. As we prepare to handle sensitive financial transactions and process critical customer data, our infrastructure must reflect the highest standards of security, reliability, and automated resilience. This document outlines the foundational security decisions implemented within our production environment. Our primary objective is to move away from manual, reactive system administration and instead embrace a proactive, automated, and mathematically verifiable approach to server security. By embedding our security rules directly into the automated processes that build our servers, we guarantee that every environment we launch will perfectly mirror our rigorous security standards, completely eliminating human error from the deployment lifecycle.
+
+## Core Security Principles
+
+Our infrastructure architecture is built upon three foundational security principles: absolute least privilege, immutable configurations, and aggressive blast radius reduction. 
+
+First, we operate under the principle of absolute least privilege. In legacy systems, applications often operate with broad administrative rights, allowing them to make sweeping changes to the server if they are compromised. We have entirely dismantled this paradigm. Every individual software service in the KijaniKiosk ecosystem now operates under a dedicated, strictly limited digital identity. These identities are mathematically bound to specific access rules. A service can only access the exact data files it requires to function, and it is explicitly blocked from seeing or modifying the data of any other service. 
+
+Second, we enforce immutable configurations. In a fast-paced technology environment, systems naturally drift over time as operators make quick adjustments to resolve immediate issues. This drift creates hidden vulnerabilities. To counter this, our servers are now built using an automated foundation script. This script actively surveys the server, identifies any deviations from our approved security baseline, and forcefully corrects them. We do not patch our underlying infrastructure; we declare how it should exist, and the automation ensures it complies. Furthermore, the core software dependencies required to run our applications are locked to specific, heavily tested versions. This ensures that an unexpected upstream software update cannot destabilize our platform during peak business hours.
+
+Finally, we prioritize aggressive blast radius reduction. We must operate under the assumption that a breach is a statistical inevitability. If a highly sophisticated threat actor manages to compromise one of our public-facing services, our architecture is designed to trap them inside a heavily restricted digital sandbox. They will find themselves unable to alter system memory, unable to communicate with unauthorized external networks, and unable to read any sensitive configuration data that belongs to our financial routing services. The compromise of a single peripheral service will not result in the compromise of the entire KijaniKiosk platform.
+
+## Operational Resilience
+
+Security cannot come at the expense of operational visibility and reliability. Our engineering team requires immediate, actionable data to resolve issues before they impact our customers. To ensure this, we have implemented automated health monitoring at the foundational level. The moment a server is provisioned, the system actively probes the internal communication channels to verify that our core applications are successfully accepting connections. The results of these probes are automatically documented in a structured health report.
+
+Additionally, log management has been entirely automated. System logs are critical for auditing and investigating security events, but left unmanaged, they will consume all available storage and crash the server. We have implemented strict capacity limits on our system journals and introduced automated rotation policies. When a log file reaches a specific age, it is safely archived, and a new record is created without dropping a single piece of incoming data. Importantly, we have engineered this rotation process to seamlessly inherit our strict security access rules, ensuring our operations team never loses visibility during automated maintenance windows.
+
+## Security Controls Overview
+
+The following table details the specific defensive measures applied to our financial and application services, translated from our automated configuration into their direct business value.
+
+| Control | What it does | Risk mitigated |
+| :--- | :--- | :--- |
+| Strict Filesystem Confinement | Locks the underlying operating system files in a read-only state for the application process. | Prevents malicious actors from rewriting core system files or installing persistent malware if they exploit an application flaw. |
+| Memory Write/Execute Denial | Blocks the application from designating any segment of computer memory as both writable and executable. | Neutralizes advanced buffer-overflow attacks, preventing hackers from injecting and running unauthorized instructions in memory. |
+| Syscall Filtering | Restricts the application’s ability to communicate directly with the core operating system kernel. | Limits the damage an attacker can inflict by removing their ability to manipulate hardware, system clocks, or low-level network states. |
+| Temporary File Isolation | Assigns a dedicated, invisible temporary storage area to the service, hiding the main system's temporary storage. | Prevents attackers from stealing sensitive data fragments left behind by other applications in shared temporary folders. |
+| Privilege Escalation Denial | Revokes the application's ability to ever request or assume administrative privileges. | Ensures that a compromised low-level application cannot trick the operating system into granting it full control of the server. |
+| Account Login Disablement | Cryptographically disables the ability for humans to interactively log into the service's digital identity. | Protects the service identity from password guessing attacks and unauthorized human interference. |
+| Default Deny Firewall | Blocks all incoming network communication by default, forcing explicit exceptions. | Renders the server invisible to automated internet scanners and unauthorized network probes. |
+| Network Socket Restriction | Limits the application to standard internet and local communication protocols. | Prevents attackers from opening exotic or hidden network pathways to bypass our primary security monitoring tools. |
+
+## Honest Security Gaps
+
+While this foundation provides an exceptionally hostile environment for threat actors, it is important to acknowledge what this layer does not protect against. This infrastructure foundation assumes that the application code deployed on top of it is relatively secure. If an engineer writes application code that intentionally logs customer credit card numbers, or if the application is susceptible to severe database injection attacks, this infrastructure layer cannot detect or stop it. Furthermore, we are currently reliant on manual initiation of this provisioning script. While the script itself is automated, the deployment pipeline lacks integration with a centralized continuous delivery system. Finally, while we have locked our software dependencies to prevent unexpected breaking changes, we currently lack an automated mechanism to scan those locked dependencies for newly discovered zero-day vulnerabilities, meaning we must rely on manual threat intelligence gathering to know when it is time to manually update our scripts. Addressing these application-layer and pipeline-layer gaps represents the next phase of our security roadmap.
