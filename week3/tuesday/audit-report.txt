@@ -1,0 +1,88 @@
+=== Service Accounts ===
+uid=995(kk-api) gid=983(kk-api) groups=983(kk-api),1002(kijanikiosk)
+uid=994(kk-payments) gid=982(kk-payments) groups=982(kk-payments),1002(kijanikiosk)
+uid=993(kk-logs) gid=981(kk-logs) groups=981(kk-logs),1002(kijanikiosk)
+kijanikiosk:x:1002:kk-api,kk-payments,kk-logs,maverick
+=== Directory Structure ===
+total 36
+drwxrwxrwx  9 root        root        4096 Jun 21 19:05 .
+drwxr-xr-x  6 root        root        4096 Jun 21 16:50 ..
+drwxr-x---  2 kk-api      kk-api      4096 Jun 21 19:05 api
+drwxrwxrwx  2 root        root        4096 Jun 21 16:50 app
+drwxr-x---+ 2 root        kijanikiosk 4096 Jun 21 19:05 config
+drwxr-x---  2 kk-logs     kk-logs     4096 Jun 21 19:05 logs
+drwxr-x---  2 kk-payments kk-payments 4096 Jun 21 19:05 payments
+drwxrwxrwx  2 root        root        4096 Jun 21 19:05 scripts
+drwxrwxrwx  3 root        root        4096 Jun 21 19:05 shared
+=== Config Files ===
+total 16
+drwxr-x---+ 2 root kijanikiosk 4096 Jun 21 19:05 .
+drwxrwxrwx  9 root root        4096 Jun 21 19:05 ..
+-rw-r-----+ 1 root kijanikiosk  133 Jun 21 19:05 db.env
+-rw-r-----+ 1 root kijanikiosk  108 Jun 21 19:05 payments-api.env
+=== Shared Logs ===
+total 16
+drwxrwxrwx  3 root    root    4096 Jun 21 19:05 .
+drwxrwxrwx  9 root    root    4096 Jun 21 19:05 ..
+drwxrws---+ 2 kk-logs kk-logs 4096 Jun 21 19:05 logs
+=== ACLs: shared/logs ===
+getfacl: Removing leading '/' from absolute path names
+# file: opt/kijanikiosk/shared/logs/
+# owner: kk-logs
+# group: kk-logs
+# flags: -s-
+user::rwx
+user:kk-payments:r-x
+user:kk-api:rwx
+user:maverick:r-x
+group::rwx
+mask::rwx
+other::---
+default:user::rwx
+default:user:kk-payments:r-x
+default:user:kk-api:rwx
+default:user:maverick:r-x
+default:group::rwx
+default:mask::rwx
+default:other::---
+
+=== ACLs: config ===
+getfacl: Removing leading '/' from absolute path names
+# file: opt/kijanikiosk/config/
+# owner: root
+# group: kijanikiosk
+user::rwx
+user:maverick:r-x
+group::r-x
+mask::r-x
+other::---
+
+=== SUID Files in /opt ===
+(empty result = PASS)
+=== Sudo Policy for amina ===
+Matching Defaults entries for amina on maverick-HP-245-14-inch-G10-Notebook-PC:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, use_pty
+
+User amina may run the following commands on maverick-HP-245-14-inch-G10-Notebook-PC:
+    (root) NOPASSWD: /bin/systemctl restart kk-api
+    (root) NOPASSWD: /bin/systemctl restart kk-payments
+    (root) NOPASSWD: /bin/systemctl restart kk-logs
+    (root) NOPASSWD: /bin/systemctl status kk-api
+    (root) NOPASSWD: /bin/systemctl status kk-payments
+    (root) NOPASSWD: /bin/systemctl status kk-logs
+    (root) NOPASSWD: /bin/journalctl -u kk-api
+    (root) NOPASSWD: /bin/journalctl -u kk-payments
+    (root) NOPASSWD: /bin/journalctl -u kk-logs
+    (root) NOPASSWD: sudoedit /etc/nginx/nginx.conf
+=== Cross-service isolation ===
+ls: cannot open directory '/opt/kijanikiosk/payments/': Permission denied
+PASS: kk-api cannot access payments/
+ls: cannot open directory '/opt/kijanikiosk/api/': Permission denied
+PASS: kk-payments cannot access api/
+DB_HOST=internal-postgres.kijanikiosk.internal
+DB_PORT=5432
+DB_NAME=kijanikiosk_prod
+DB_USER=kk_app
+DB_PASSWORD=s3cr3t-pr0d-p@ssword
+PASS: kk-api can read config
