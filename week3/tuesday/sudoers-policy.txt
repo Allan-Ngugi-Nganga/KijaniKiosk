@@ -1,0 +1,26 @@
+# Grants Amina permission to restart specific KijaniKiosk services
+amina ALL=(root) NOPASSWD: /bin/systemctl restart kk-api
+amina ALL=(root) NOPASSWD: /bin/systemctl restart kk-payments
+amina ALL=(root) NOPASSWD: /bin/systemctl restart kk-logs
+
+# Grants Amina permission to view service status
+amina ALL=(root) NOPASSWD: /bin/systemctl status kk-api
+amina ALL=(root) NOPASSWD: /bin/systemctl status kk-payments
+amina ALL=(root) NOPASSWD: /bin/systemctl status kk-logs
+
+# Grants Amina permission to read application logs
+amina ALL=(root) NOPASSWD: /bin/journalctl -u kk-api
+amina ALL=(root) NOPASSWD: /bin/journalctl -u kk-payments
+amina ALL=(root) NOPASSWD: /bin/journalctl -u kk-logs
+
+# Grants Amina safe file editing without root shell escape
+amina ALL=(root) NOPASSWD: sudoedit /etc/nginx/nginx.conf
+
+---
+### Documented Attack Scenarios Averted by this Policy ###
+
+Attack Scenario 1 (The Editor Escape): 
+If the policy was simply `amina ALL=(root) NOPASSWD: /bin/systemctl`, an attacker could run `sudo systemctl edit <service>`. This opens the systemd configuration file in a terminal editor as root. The attacker can then use the editor's shell escape commands (e.g., typing `:!/bin/bash` in vim) to drop out of the editor and into a full root terminal, bypassing the sudo restrictions completely.
+
+Attack Scenario 2 (Malicious Service Execution): 
+Unrestricted `systemctl` access allows an operator to run `sudo systemctl link /tmp/malicious.service`. An attacker could write a custom systemd service file in a world-writable directory like `/tmp` that executes a reverse shell or changes the root password. They could then use their unrestricted sudo access to start that malicious service, executing their payload as root.
