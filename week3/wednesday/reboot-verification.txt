@@ -1,0 +1,25 @@
+=== systemctl status ===
+● kk-api.service - KijaniKiosk API Service
+     Loaded: loaded (/etc/systemd/system/kk-api.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: core-dump) since Sun 2026-06-21 20:47:38 EAT; 2s ago
+    Process: 8950 ExecStart=/usr/bin/node server.js (code=dumped, signal=SYS)
+   Main PID: 8950 (code=dumped, signal=SYS)
+        CPU: 78ms
+
+=== apt-mark showhold ===
+nginx
+nodejs
+
+=== ufw status ===
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere                   # SSH Access
+80/tcp                     ALLOW IN    Anywhere                   # HTTP Nginx
+22/tcp (v6)                ALLOW IN    Anywhere (v6)              # SSH Access
+80/tcp (v6)                ALLOW IN    Anywhere (v6)              # HTTP Nginx
+
