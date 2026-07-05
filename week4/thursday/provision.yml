@@ -1,0 +1,32 @@
+---
+- name: Provision KijaniKiosk Servers
+  hosts: kijanikiosk
+  become: true
+
+  tasks:
+    - name: Update apt cache and install required packages
+      ansible.builtin.apt:
+        name:
+          - nginx
+          - acl
+          - ufw
+        state: present
+        update_cache: true
+
+    - name: Create the application user 'kijani'
+      ansible.builtin.user:
+        name: kijani
+        system: true
+        state: present
+
+    - name: Create the application directory
+      ansible.builtin.file:
+        path: /opt/kijanikiosk
+        state: directory
+        owner: kijani
+        group: kijani
+        mode: '0755'
+
+    - name: Show resolved variables
+      ansible.builtin.debug:
+        msg: "Service: {{ service_name | default('not set') }} Port: {{ service_port | default('not set') }}"   

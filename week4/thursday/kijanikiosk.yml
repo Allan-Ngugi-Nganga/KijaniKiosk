@@ -1,0 +1,79 @@
+---
+    - name: Configure KijaniKiosk servers
+      hosts: kijanikiosk
+      become: true
+      become_method: sudo
+
+      handlers:
+        - name: Reload systemd
+          ansible.builtin.systemd:
+            daemon_reload: true
+
+        - name: Restart service
+          ansible.builtin.systemd:
+            name: "{{ service_name }}.service"
+            state: restarted
+
+      tasks:
+        # --- PHASE 1: PACKAGES ---
+        - name: Update apt cache
+          ansible.builtin.apt:
+            update_cache: true
+            cache_valid_time: 3600
+
+        - name: Install required packages
+          ansible.builtin.apt:
+            name:
+              - nginx
+              - ufw
+              - acl
+            state: present
+            install_recommends: false
+
+        # --- PHASE 2: SERVICE ACCOUNTS ---
+        - name: Create kijanikiosk system group
+          ansible.builtin.group:
+            name: "{{ service_group }}"
+            system: true
+            state: present
+
+        - name: Create service account
+          ansible.builtin.user:
+            name: "{{ service_name }}"
+            group: "{{ service_group }}"
+            system: true
+            shell: /usr/sbin/nologin
+            create_home: false
+            state: present
+
+        # --- PHASE 3: DIRECTORIES ---
+        - name: Create application directory tree
+          ansible.builtin.file:
+            path: "{{ item.path }}"
+            state: directory
+            owner: "{{ item.owner }}"
+            group: "{{ service_group }}"
+            mode: "{{ item.mode }}"
+          loop:
+            - { path: "{{ base_dir }}/{{ service_name | split('-') | last }}", owner: "{{ service_name }}", mode: "0750" }
+            - { path: "{{ log_dir }}", owner: "{{ service_name }}", mode: "0770" }
+
+        # --- PHASE 5: FIREWALL ---
+        - name: Set ufw default deny incoming
+          community.general.ufw:
+            state: enabled
+            default: deny
+            direction: incoming
+
+        - name: Allow SSH
+          community.general.ufw:
+            rule: allow
+            port: '22'
+            proto: tcp
+
+        - name: Allow service port
+          community.general.ufw:
+            rule: allow
+            port: "{{ service_port | string }}"
+            proto: tcp
+            src: 127.0.0.1
