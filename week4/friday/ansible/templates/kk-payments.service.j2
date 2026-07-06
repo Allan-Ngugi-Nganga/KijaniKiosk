@@ -1,0 +1,44 @@
+[Unit]
+Description=kk-payments
+After=network.target
+
+[Service]
+# Service Identity
+User=kk-payments
+Group=kk-payments
+Type=simple
+
+# Paths (Keep under /opt/ to avoid conflict with ProtectSystem=strict)
+EnvironmentFile=/opt/kijanikiosk/config/payments-api.env
+WorkingDirectory=/opt/kijanikiosk
+ExecStart=/usr/bin/python3 -m http.server 3001
+
+# Hardening Directives (This lowers your security score)
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictRealtime=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+LockPersonality=true
+ProtectHostname=true
+RemoveIPC=true
+UMask=0077
+ProtectKernelModules=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictNamespaces=yes
+
+# System Call Filtering (The biggest score impact)
+SystemCallFilter=@system-service
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
+

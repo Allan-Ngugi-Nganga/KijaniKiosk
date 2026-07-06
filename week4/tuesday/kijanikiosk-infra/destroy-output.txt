@@ -1,0 +1,244 @@
+maverick@dev:~/kijanikiosk-devops/week4/tuesday/kijanikiosk-infra$ terraform destroy
+data.aws_ami.ubuntu: Reading...
+aws_security_group.my_cool_firewall: Refreshing state... [id=sg-050bf4cb936278a11]
+aws_vpc_security_group_egress_rule.outgoing: Refreshing state... [id=sgr-080e2f7be5888ffc2]
+aws_vpc_security_group_ingress_rule.ssh: Refreshing state... [id=sgr-0641061a52c74c39a]
+aws_vpc_security_group_ingress_rule.http: Refreshing state... [id=sgr-026f23ec52605aac5]
+data.aws_ami.ubuntu: Read complete after 2s [id=ami-0d28727121d5d4a3c]
+aws_instance.kijanikiosk_api: Refreshing state... [id=i-0b8367072cde711c3]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions
+are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # aws_instance.kijanikiosk_api will be destroyed
+  - resource "aws_instance" "kijanikiosk_api" {
+      - ami                                  = "ami-0d28727121d5d4a3c" -> null
+      - arn                                  = "arn:aws:ec2:us-east-1:648372560919:instance/i-0b8367072cde711c3" -> null
+      - associate_public_ip_address          = true -> null
+      - availability_zone                    = "us-east-1d" -> null
+      - disable_api_stop                     = false -> null
+      - disable_api_termination              = false -> null
+      - ebs_optimized                        = false -> null
+      - force_destroy                        = false -> null
+      - get_password_data                    = false -> null
+      - hibernation                          = false -> null
+      - id                                   = "i-0b8367072cde711c3" -> null
+      - instance_initiated_shutdown_behavior = "stop" -> null
+      - instance_state                       = "running" -> null
+      - instance_type                        = "t3.micro" -> null
+      - ipv6_address_count                   = 0 -> null
+      - ipv6_addresses                       = [] -> null
+      - key_name                             = "kijanikiosk-key" -> null
+      - monitoring                           = false -> null
+      - placement_partition_number           = 0 -> null
+      - primary_network_interface_id         = "eni-0f7db932fbd91a07a" -> null
+      - private_dns                          = "ip-172-31-45-165.ec2.internal" -> null
+      - private_ip                           = "172.31.45.165" -> null
+      - public_dns                           = "ec2-35-173-252-141.compute-1.amazonaws.com" -> null
+      - public_ip                            = "35.173.252.141" -> null
+      - region                               = "us-east-1" -> null
+      - secondary_private_ips                = [] -> null
+      - security_groups                      = [
+          - "kijanikiosk-api-sg",
+        ] -> null
+      - source_dest_check                    = true -> null
+      - subnet_id                            = "subnet-0a284790080dd558b" -> null
+      - tags                                 = {
+          - "Environment" = "staging"
+          - "Name"        = "kijanikiosk-api-staging"
+        } -> null
+      - tags_all                             = {
+          - "Environment" = "staging"
+          - "Name"        = "kijanikiosk-api-staging"
+        } -> null
+      - tenancy                              = "default" -> null
+      - user_data_replace_on_change          = false -> null
+      - vpc_security_group_ids               = [
+          - "sg-050bf4cb936278a11",
+        ] -> null
+        # (8 unchanged attributes hidden)
+
+      - capacity_reservation_specification {
+          - capacity_reservation_preference = "open" -> null
+        }
+
+      - cpu_options {
+          - core_count            = 1 -> null
+          - threads_per_core      = 2 -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - credit_specification {
+          - cpu_credits = "unlimited" -> null
+        }
+
+      - enclave_options {
+          - enabled = false -> null
+        }
+
+      - maintenance_options {
+          - auto_recovery = "default" -> null
+        }
+
+      - metadata_options {
+          - http_endpoint               = "enabled" -> null
+          - http_protocol_ipv6          = "disabled" -> null
+          - http_put_response_hop_limit = 1 -> null
+          - http_tokens                 = "optional" -> null
+          - instance_metadata_tags      = "disabled" -> null
+        }
+
+      - primary_network_interface {
+          - delete_on_termination = true -> null
+          - network_interface_id  = "eni-0f7db932fbd91a07a" -> null
+        }
+
+      - private_dns_name_options {
+          - enable_resource_name_dns_a_record    = false -> null
+          - enable_resource_name_dns_aaaa_record = false -> null
+          - hostname_type                        = "ip-name" -> null
+        }
+
+      - root_block_device {
+          - delete_on_termination = true -> null
+          - device_name           = "/dev/sda1" -> null
+          - encrypted             = false -> null
+          - iops                  = 100 -> null
+          - tags                  = {} -> null
+          - tags_all              = {} -> null
+          - throughput            = 0 -> null
+          - volume_id             = "vol-0d5d512a8f9600cb7" -> null
+          - volume_size           = 8 -> null
+          - volume_type           = "gp2" -> null
+            # (1 unchanged attribute hidden)
+        }
+    }
+
+  # aws_security_group.my_cool_firewall will be destroyed
+  - resource "aws_security_group" "my_cool_firewall" {
+      - arn                    = "arn:aws:ec2:us-east-1:648372560919:security-group/sg-050bf4cb936278a11" -> null
+      - description            = "Security group for KijaniKiosk API" -> null
+      - egress                 = [
+          - {
+              - cidr_blocks      = [
+                  - "0.0.0.0/0",
+                ]
+              - from_port        = 0
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "-1"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 0
+                # (1 unchanged attribute hidden)
+            },
+        ] -> null
+      - id                     = "sg-050bf4cb936278a11" -> null
+      - ingress                = [
+          - {
+              - cidr_blocks      = [
+                  - "0.0.0.0/0",
+                ]
+              - from_port        = 80
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 80
+                # (1 unchanged attribute hidden)
+            },
+          - {
+              - cidr_blocks      = [
+                  - "196.207.178.12/32",
+                ]
+              - from_port        = 22
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 22
+                # (1 unchanged attribute hidden)
+            },
+        ] -> null
+      - name                   = "kijanikiosk-api-sg" -> null
+      - owner_id               = "648372560919" -> null
+      - region                 = "us-east-1" -> null
+      - revoke_rules_on_delete = false -> null
+      - tags                   = {} -> null
+      - tags_all               = {} -> null
+      - vpc_id                 = "vpc-074e423be2067f471" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_vpc_security_group_egress_rule.outgoing will be destroyed
+  - resource "aws_vpc_security_group_egress_rule" "outgoing" {
+      - arn                    = "arn:aws:ec2:us-east-1:648372560919:security-group-rule/sgr-080e2f7be5888ffc2" -> null
+      - cidr_ipv4              = "0.0.0.0/0" -> null
+      - id                     = "sgr-080e2f7be5888ffc2" -> null
+      - ip_protocol            = "-1" -> null
+      - region                 = "us-east-1" -> null
+      - security_group_id      = "sg-050bf4cb936278a11" -> null
+      - security_group_rule_id = "sgr-080e2f7be5888ffc2" -> null
+      - tags_all               = {} -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.http will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "http" {
+      - arn                    = "arn:aws:ec2:us-east-1:648372560919:security-group-rule/sgr-026f23ec52605aac5" -> null
+      - cidr_ipv4              = "0.0.0.0/0" -> null
+      - from_port              = 80 -> null
+      - id                     = "sgr-026f23ec52605aac5" -> null
+      - ip_protocol            = "tcp" -> null
+      - region                 = "us-east-1" -> null
+      - security_group_id      = "sg-050bf4cb936278a11" -> null
+      - security_group_rule_id = "sgr-026f23ec52605aac5" -> null
+      - tags_all               = {} -> null
+      - to_port                = 80 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.ssh will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "ssh" {
+      - arn                    = "arn:aws:ec2:us-east-1:648372560919:security-group-rule/sgr-0641061a52c74c39a" -> null
+      - cidr_ipv4              = "196.207.178.12/32" -> null
+      - from_port              = 22 -> null
+      - id                     = "sgr-0641061a52c74c39a" -> null
+      - ip_protocol            = "tcp" -> null
+      - region                 = "us-east-1" -> null
+      - security_group_id      = "sg-050bf4cb936278a11" -> null
+      - security_group_rule_id = "sgr-0641061a52c74c39a" -> null
+      - tags_all               = {} -> null
+      - to_port                = 22 -> null
+    }
+
+Plan: 0 to add, 0 to change, 5 to destroy.
+
+Changes to Outputs:
+  - api_server_ip = "35.173.252.141" -> null
+
+Do you really want to destroy all resources?
+  Terraform will destroy all your managed infrastructure, as shown above.
+  There is no undo. Only 'yes' will be accepted to confirm.
+
+  Enter a value: yes
+
+aws_vpc_security_group_ingress_rule.ssh: Destroying... [id=sgr-0641061a52c74c39a]
+aws_vpc_security_group_egress_rule.outgoing: Destroying... [id=sgr-080e2f7be5888ffc2]
+aws_vpc_security_group_ingress_rule.http: Destroying... [id=sgr-026f23ec52605aac5]
+aws_instance.kijanikiosk_api: Destroying... [id=i-0b8367072cde711c3]
+aws_vpc_security_group_ingress_rule.http: Destruction complete after 1s
+aws_vpc_security_group_egress_rule.outgoing: Destruction complete after 1s
+aws_vpc_security_group_ingress_rule.ssh: Destruction complete after 1s
+aws_instance.kijanikiosk_api: Still destroying... [id=i-0b8367072cde711c3, 00m10s elapsed]
+aws_instance.kijanikiosk_api: Still destroying... [id=i-0b8367072cde711c3, 00m20s elapsed]
+aws_instance.kijanikiosk_api: Still destroying... [id=i-0b8367072cde711c3, 00m30s elapsed]
+aws_instance.kijanikiosk_api: Still destroying... [id=i-0b8367072cde711c3, 00m40s elapsed]
+aws_instance.kijanikiosk_api: Destruction complete after 43s
+aws_security_group.my_cool_firewall: Destroying... [id=sg-050bf4cb936278a11]
+aws_security_group.my_cool_firewall: Destruction complete after 1s
+
+Destroy complete! Resources: 5 destroyed.
