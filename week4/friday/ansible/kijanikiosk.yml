@@ -1,0 +1,108 @@
+---
+- name: Configure KijaniKiosk servers
+  hosts: all
+  become: true
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+    - name: Restart service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        state: restarted
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install packages
+      ansible.builtin.apt:
+        name: [nginx, ufw, acl, logrotate]
+        state: present
+
+    - name: Create group
+      ansible.builtin.group:
+        name: kijani
+        state: present
+
+    - name: Create service account
+      ansible.builtin.user:
+        name: "{{ service_name }}"
+        group: kijani
+        shell: /usr/sbin/nologin
+        state: present
+
+    - name: Create directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ service_name }}"
+        group: kijani
+        mode: '0755'
+      loop:
+        - "{{ base_dir }}"
+        - "{{ log_dir }}"
+
+    - name: Create configuration sub-directory
+      ansible.builtin.file:
+          path: "{{ base_dir }}/config"
+          state: directory
+          owner: "{{ service_name }}"
+          group: "{{ service_group }}"
+          mode: '0700'
+
+    - name: Deploy environment configuration variables
+      ansible.builtin.copy:
+        dest: "{{ base_dir }}/config/{{ service_name }}.env"
+        content: "PORT={{ service_port }}\nNODE_ENV=staging\n"
+        owner: "{{ service_name }}"
+        group: "{{ service_group }}"
+        mode: '0600'
+      notify: [Restart service]
+
+    - name: Deploy systemd unit file
+      template:
+        src: templates/kk-payments.service.j2
+        dest: /etc/systemd/system/kk-payments.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload systemd
+
+    - name: Enable service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        enabled: true
+        state: started
+
+    - name: UFW configuration
+      community.general.ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+
+    - name: Allow SSH
+      community.general.ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Allow service port
+      community.general.ufw:
+        rule: allow
+        port: "{{ service_port | string }}"
+        proto: tcp
+
+    - name: Create journal directory
+      ansible.builtin.file:
+        path: /var/log/journal
+        state: directory
+        mode: '0755'
+
+    - name: Deploy logrotate
+      ansible.builtin.template:
+        src: templates/logrotate.j2
+        dest: "/etc/logrotate.d/{{ service_name }}"
