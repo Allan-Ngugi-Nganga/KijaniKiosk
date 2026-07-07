@@ -1,7 +1,7 @@
 pipeline{
     stages{
         stage('Environment Check'){
-            step {
+            steps {
                 sh 'echo "Build triggered for : $(git log -1 --pretty=%s)"'
                 sh 'node --version'
                 sh 'npm --version'
