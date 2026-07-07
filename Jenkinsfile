@@ -11,7 +11,7 @@ pipeline{
 
     post {
         always{
-            echo "Pipeline finished. Status: ${currentBuild.result ?: 'SUCCESS}"
+            echo "Pipeline finished. Status: ${currentBuild.result ?: 'SUCCESS'}"
         }
     }
 }
