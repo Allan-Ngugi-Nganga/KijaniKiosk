@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 pipeline {
     agent any
 
@@ -27,11 +28,27 @@ pipeline {
         stage('Archive') {
             steps {
                 echo "Archive stage: TODO"
+=======
+pipeline{
+    agent any
+
+    tools {
+        nodejs 'Node20' 
+    }
+    
+    stages{
+        stage('Environment Check'){
+            steps {
+                sh 'echo "Build triggered for : $(git log -1 --pretty=%s)"'
+                sh 'node --version'
+                sh 'npm --version'
+>>>>>>> master
             }
         }
     }
 
     post {
+<<<<<<< HEAD
         success {
             echo "Pipeline succeeded: ${APP_NAME} build ${BUILD_NUMBER}"
         }
@@ -40,6 +57,10 @@ pipeline {
         }
         always {
             echo "Build URL: ${BUILD_URL}"
+=======
+        always{
+            echo "Pipeline finished. Status: ${currentBuild.result ?: 'SUCCESS'}"
+>>>>>>> master
         }
     }
 }
