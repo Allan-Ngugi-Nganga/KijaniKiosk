@@ -10,6 +10,9 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - /tmp/kijanikiosk-payments-mock:/var/jenkins_home/mock-repo:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/maverick/kijanikiosk-devops:/home/maverick/kijanikiosk-devops
+      - /usr/bin/docker:/usr/bin/docker
   nexus:
     image: sonatype/nexus3:latest
     ports:
