@@ -1,0 +1,13 @@
+[Unit]
+Description={{ service_name }}
+[Service]
+EnvironmentFile={{ base_dir }}/config/{{ service_name }}.env
+ExecStart=/usr/bin/python3 -m http.server {{ service_port }}
+User={{ service_name }}
+Group={{ service_group }}
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+[Install]
+WantedBy=multi-user.target

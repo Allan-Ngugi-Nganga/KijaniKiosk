@@ -1,0 +1,151 @@
+Started by user unknown or anonymous
+Obtained Jenkinsfile from git file:///var/jenkins_home/mock-repo
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/kijanikiosk-payments
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+Cloning the remote Git repository
+Cloning repository file:///var/jenkins_home/mock-repo
+ > git init /var/jenkins_home/workspace/kijanikiosk-payments # timeout=10
+Fetching upstream changes from file:///var/jenkins_home/mock-repo
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- file:///var/jenkins_home/mock-repo +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url file:///var/jenkins_home/mock-repo # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+ > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+Checking out Revision c3b120def460c5012321248b907dd62715f90a78 (refs/remotes/origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f c3b120def460c5012321248b907dd62715f90a78 # timeout=10
+Commit message: "ci: fix Nexus URL for Docker network"
+ > git rev-list --no-walk c3b120def460c5012321248b907dd62715f90a78 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ node -p require('./package.json').version
+[Pipeline] sh
++ git rev-parse --short HEAD
+[Pipeline] sh
++ node -p require('./package.json').version
+[Pipeline] sh
++ git rev-parse --short HEAD
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] timeout
+Timeout set to expire in 15 min
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Build)
+[Pipeline] sh
++ npm ci
+
+up to date, audited 1 package in 202ms
+
+found 0 vulnerabilities
+[Pipeline] sh
++ npm run build
+
+> kijanikiosk-payments@1.0.0 build
+> mkdir -p dist && cp index.js dist/
+
+[Pipeline] sh
++ test -d dist
++ ls dist
++ wc -l
+1
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test)
+[Pipeline] sh
++ set -e
++ npm test
+
+> kijanikiosk-payments@1.0.0 test
+> node test.js
+
+Running tests...
+All tests passed
+Post stage
+[Pipeline] junit
+Recording test results
+None of the test reports contained any result
+[Checks API] No suitable checks publisher found.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Archive)
+[Pipeline] archiveArtifacts
+Archiving artifacts
+Recording fingerprints
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Publish)
+[Pipeline] withCredentials
+Masking supported pattern matches of $NEXUS_PASS
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ echo -n admin:****
++ base64
++ NEXUS_TOKEN=YWRtaW46****
++ cat
++ npm version 1.0.0-c3b120d --no-git-tag-version --allow-same-version
+v1.0.0-c3b120d
++ npm publish
+npm notice
+npm notice 📦  kijanikiosk-payments@1.0.0-c3b120d
+npm notice Tarball Contents
+npm notice 2.9kB Jenkinsfile
+npm notice 41B dist/index.js
+npm notice 41B index.js
+npm notice 63B junit.xml
+npm notice 276B package.json
+npm notice 207B test.js
+npm notice Tarball Details
+npm notice name: kijanikiosk-payments
+npm notice version: 1.0.0-c3b120d
+npm notice filename: kijanikiosk-payments-1.0.0-c3b120d.tgz
+npm notice package size: 1.5 kB
+npm notice unpacked size: 3.5 kB
+npm notice shasum: 56dacb88c3afb978165cb8e904bc56041144f6c8
+npm notice integrity: sha512-MqwFNZh1x9qFU[...]TPW0l6/o7gqMw==
+npm notice total files: 6
+npm notice
+npm notice Publishing to http://nexus:8081/repository/npm-kijanikiosk/ with tag latest and default access
++ kijanikiosk-payments@1.0.0-c3b120d
++ trap rm -f .npmrc EXIT
++ rm -f .npmrc
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] deleteDir
+[Pipeline] echo
+Published kijanikiosk-payments version 1.0.0-c3b120d to Nexus
+[Pipeline] echo
+Artifact URL: http://nexus:8081/repository/npm-kijanikiosk/kijanikiosk-payments/-/kijanikiosk-payments-1.0.0-c3b120d.tgz
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
