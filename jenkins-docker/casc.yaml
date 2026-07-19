@@ -1,0 +1,39 @@
+jenkins:
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+       - id: admin
+         password: admin
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "nexus-credentials"
+              username: "admin"
+              password: "3b26b6bd-60f3-4faf-9d3a-9da8c97916e9"
+              description: "Nexus admin credentials"
+
+jobs:
+  - script: |
+      pipelineJob('kijanikiosk-payments') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('file:///var/jenkins_home/mock-repo')
+                }
+                branch('master')
+              }
+            }
+            lightweight()
+          }
+        }
+      }
