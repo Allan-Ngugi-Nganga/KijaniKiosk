@@ -1,0 +1,11 @@
+# Local pipeline artifacts
+*.log
+!pipeline-run-final.log # Keep this specific log!
+
+# Temporary files
+*.tmp
+.DS_Store
+
+.terraform/
+*.tfstate
+*.tfstate.backup

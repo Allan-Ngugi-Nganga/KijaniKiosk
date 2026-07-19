@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  jenkins:
+    build: .
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /tmp/kijanikiosk-payments-mock:/var/jenkins_home/mock-repo:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/maverick/kijanikiosk-devops:/home/maverick/kijanikiosk-devops
+      - /usr/bin/docker:/usr/bin/docker
+  nexus:
+    image: sonatype/nexus3:latest
+    ports:
+      - "8082:8081"
+    volumes:
+      - nexus_data:/nexus-data
+volumes:
+  jenkins_home:
+  nexus_data:
