@@ -1,14 +1,20 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:18-alpine'
+            args  '-v /home/maverick/kijanikiosk-devops:/home/maverick/kijanikiosk-devops --network jenkins-docker_default'
+            customWorkspace '/home/maverick/kijanikiosk-devops/workspace/kijanikiosk-payments'
+        }
+    }
 
     environment {
-        NODE_ENV  = 'test'
-        BUILD_DIR = 'dist'
-        APP_NAME  = 'kijanikiosk-payments'
-        PKG_VERSION = sh(script: 'node -p "require(\'./package.json\').version"', returnStdout: true).trim()
-        GIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+        NODE_ENV         = 'test'
+        BUILD_DIR        = 'dist'
+        APP_NAME         = 'kijanikiosk-payments'
+        PKG_VERSION      = sh(script: 'node -p "require(\'./package.json\').version"', returnStdout: true).trim()
+        GIT_SHORT        = sh(script: 'echo $GIT_COMMIT | cut -c1-7', returnStdout: true).trim()
         ARTIFACT_VERSION = "${PKG_VERSION}-${GIT_SHORT}"
-        NEXUS_URL = 'http://nexus:8081/repository/npm-kijanikiosk'
+        NEXUS_URL        = 'http://nexus:8081/repository/npm-kijanikiosk'
     }
 
     options {
@@ -18,37 +24,48 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
+        stage('Lint') {
             steps {
-                echo "Installing dependencies for ${APP_NAME}..."
-                sh 'npm ci'
-
-                echo "Building application..."
-                sh 'npm run build'
-
-                echo "Verifying build output..."
-                sh '''
-                    set -e
-                    test -d "${BUILD_DIR}" || { echo "ERROR: build directory not found"; exit 1; }
-                    echo "Build output: $(ls ${BUILD_DIR} | wc -l) files in ${BUILD_DIR}/"
-                '''
+                sh 'node -c index.js test.js'
             }
         }
-        stage('Test') {
+
+        stage('Build') {
             steps {
-                sh 'set -e && npm test'
+                sh 'npm ci'
+                sh 'npm run build'
+                sh 'test -d ${BUILD_DIR} && ls ${BUILD_DIR} | wc -l'
+                stash name: 'build-output', includes: "${BUILD_DIR}/**/*"
             }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: '**/junit.xml'
+        }
+
+        stage('Verify') {
+            parallel {
+                stage('Test') {
+                    steps {
+                        unstash 'build-output'
+                        sh 'set -e && npm test'
+                    }
+                    post {
+                        always {
+                            junit allowEmptyResults: true, testResults: '**/junit.xml'
+                        }
+                    }
+                }
+                stage('Security Audit') {
+                    steps {
+                        sh 'npm audit --audit-level=high || true'
+                    }
                 }
             }
         }
+
         stage('Archive') {
             steps {
                 archiveArtifacts artifacts: "${BUILD_DIR}/**/*", fingerprint: true
             }
         }
+
         stage('Publish') {
             steps {
                 withCredentials([usernamePassword(
@@ -58,19 +75,19 @@ pipeline {
                 )]) {
                     sh '''
                         set -e
-                        # Generate NEXUS_TOKEN from NEXUS_USER and NEXUS_PASS
+                        # Generate base64 token from NEXUS_USER:NEXUS_PASS
                         NEXUS_TOKEN=$(echo -n "${NEXUS_USER}:${NEXUS_PASS}" | base64)
-                        # Write .npmrc with registry URL and auth token
+                        # Write .npmrc with registry and auth token
                         cat << EOF > .npmrc
 registry=http://nexus:8081/repository/npm-kijanikiosk/
 //nexus:8081/repository/npm-kijanikiosk/:_auth=\${NEXUS_TOKEN}
 EOF
-                        # Update package.json version to ARTIFACT_VERSION
+                        # Update package version to ARTIFACT_VERSION
                         npm version ${ARTIFACT_VERSION} --no-git-tag-version --allow-same-version
-                        # Run npm publish
-                        npm publish
-                        # Use trap to ensure .npmrc is deleted even if publish fails:
+                        # Use trap to ensure .npmrc is removed even if publish fails:
                         trap "rm -f .npmrc" EXIT
+                        # npm publish
+                        npm publish
                     '''
                 }
             }
@@ -79,15 +96,17 @@ EOF
 
     post {
         success {
-            echo "Published ${env.APP_NAME} version ${env.ARTIFACT_VERSION} to Nexus"
+            echo "Successfully built and published version ${env.ARTIFACT_VERSION} to Nexus"
             echo "Artifact URL: ${env.NEXUS_URL}/kijanikiosk-payments/-/kijanikiosk-payments-${env.ARTIFACT_VERSION}.tgz"
         }
         failure {
-            echo "Pipeline FAILED: ${env.APP_NAME} build ${env.BUILD_NUMBER} - check logs"
+            echo "Pipeline FAILED: ${env.APP_NAME} build ${env.BUILD_NUMBER}. Please check logs at: ${env.BUILD_URL}"
+        }
+        changed {
+            echo "Build status changed to ${currentBuild.currentResult} - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
         }
         always {
-            echo "Build URL: ${BUILD_URL}"
-            deleteDir()
+            cleanWs()
         }
     }
 }
